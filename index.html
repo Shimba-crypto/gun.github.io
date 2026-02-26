@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grade 7 Test System - Mobile Friendly</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 12px;
+            color: #333;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            padding: 20px;
+            width: 100%;
+            max-width: 960px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        h2, h3 { color: #2a5298; text-align: center; margin-bottom: 16px; font-size: 1.5rem; }
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        .stat-card h4 { margin-bottom: 6px; font-size: 0.95rem; color: #555; }
+        .stat-card .value { font-size: 1.5rem; font-weight: 600; color: #2a5298; }
+        .clock, #timeLeft {
+            font-size: 1.3rem;
+            color: #e74c3c;
+            text-align: center;
+            margin: 12px 0;
+            font-weight: 700;
+            font-family: monospace;
+        }
+        input, select, button {
+            margin: 12px 0;
+            padding: 14px 16px;
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        button {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            min-height: 52px;
+        }
+        button:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .nav-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .nav-buttons button { flex: 1; }
+        .hidden { display: none !important; }
+        .question {
+            margin-bottom: 28px;
+            padding: 18px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            font-size: 1.05rem;
+        }
+        .option-row {
+            display: flex;
+            align-items: center;
+            margin: 14px 0;
+            cursor: pointer;
+            min-height: 48px;
+            padding: 8px;
+            border-radius: 8px;
+        }
+        .option-row:hover, .option-row:active { background: #e8f0fe; }
+        .option-radio { width: 22px; height: 22px; margin-right: 14px; flex-shrink: 0; }
+        label { flex: 1; font-size: 1rem; word-break: break-word; }
+        .progress-container {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #27ae60;
+            width: 0;
+            transition: width 0.4s ease;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.95rem; }
+        th, td { border: 1px solid #e0e0e0; padding: 10px; text-align: left; }
+        th { background: #2a5298; color: white; }
+        @media (min-width: 600px) {
+            body { padding: 20px; }
+            .container { padding: 32px; }
+            .nav-buttons { flex-direction: row; justify-content: center; }
+            .question { font-size: 1.1rem; }
+            h2 { font-size: 1.8rem; }
+            .stat-card .value { font-size: 1.8rem; }
+        }
+        @media (min-width: 900px) {
+            .container { max-width: 1100px; }
+            .dashboard-stats { grid-template-columns: repeat(5, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login -->
+        <div id="loginSection" class="section">
+            <h2>Grade 7 Exam Practice</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <select id="role">
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+            </select>
+            <button onclick="login()">Login</button>
+        </div>
+
+        <!-- Student Dashboard -->
+        <div id="studentDashboard" class="section hidden">
+            <h2>Welcome, <span id="studentName"></span></h2>
+            <div class="clock" id="liveClock">Loading time...</div>
+            <div class="dashboard-stats">
+                <div class="stat-card"><h4>Total Tests</h4><div class="value" id="totalTests">0</div></div>
+                <div class="stat-card"><h4>Total Correct</h4><div class="value" id="totalScore">0</div></div>
+                <div class="stat-card"><h4>Total Reward</h4><div class="value" id="totalReward">K0.00</div></div>
+                <div class="stat-card"><h4>Average Score</h4><div class="value" id="avgScore">0%</div></div>
+                <div class="stat-card"><h4>Last Test</h4><div class="value" id="lastTestDate">None</div></div>
+            </div>
+            <button onclick="showSection('testSection')">Start New Test</button>
+            <button onclick="logout()" style="background:#e74c3c; margin-top:12px;">Logout</button>
+        </div>
+
+        <!-- Test Selection -->
+        <div id="testSection" class="section hidden">
+            <h2>Choose Your Test</h2>
+            <select id="subject">
+                <option value="">Select Subject</option>
+                <option value="science">Integrated Science</option>
+                <option value="mathematics">Mathematics</option>
+                <option value="english">English Language</option>
+            </select>
+            <select id="questionsCount">
+                <option value="20">20 Questions (10 min)</option>
+                <option value="30">30 Questions (20 min)</option>
+                <option value="50">50 Questions (30 min)</option>
+            </select>
+            <button onclick="startTest()">Begin Test</button>
+            <button onclick="showSection('studentDashboard')">Back to Dashboard</button>
+        </div>
+
+        <!-- Test Taking -->
+        <div id="testPage" class="section hidden">
+            <div id="timeLeft">Time Left: 00:00</div>
+            <div class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
+            <div id="questionContainer"></div>
+            <div id="pageInfo" style="text-align:center; margin:16px 0; color:#555; font-size:1rem;"></div>
+            <div class="nav-buttons">
+                <button id="prevBtn" onclick="previousPage()">Previous</button>
+                <button id="nextBtn" onclick="nextPage()">Next</button>
+                <button id="finishBtn" onclick="submitTest()" class="hidden" style="background:#27ae60;">Finish Test</button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsSection" class="section hidden">
+            <h2>Test Results</h2>
+            <div id="resultsDisplay" style="font-size:1.3rem; text-align:center; margin:20px 0;"></div>
+            <div id="feedbackContainer" style="max-height:400px; overflow-y:auto; font-size:0.98rem; line-height:1.5;"></div>
+            <button onclick="showSection('studentDashboard')">Back to Dashboard</button>
+        </div>
+
+        <!-- Teacher Dashboard -->
+        <div id="teacherDashboard" class="section hidden">
+            <h2>Teacher Dashboard</h2>
+            <div style="border-bottom:2px solid #eee; margin-bottom:20px; padding-bottom:15px;">
+                <h3>Add New Student</h3>
+                <input type="text" id="newStudentUsername" placeholder="Username">
+                <input type="password" id="newStudentPassword" placeholder="Password">
+                <button onclick="addStudent()">Create Account</button>
+            </div>
+            <h3>Student Performance Records</h3>
+            <div style="overflow-x:auto;">
+                <table id="teacherProgress">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Password</th>
+                            <th>Subject</th>
+                            <th>Score</th>
+                            <th>Reward (K)</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacherTableBody"></tbody>
+                </table>
+            </div>
+            <button onclick="logout()" style="margin-top:25px; width:100%; background:#e74c3c;">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // ────────────────────────────────────────────────
+// DATA & STATE
+// ────────────────────────────────────────────────
+let students = JSON.parse(localStorage.getItem('students')) || [
+    { username: 'test', password: 'pass', role: 'student' },
+    { username: 'shimba', password: '1234', role: 'student' }
+];
+let testHistory = JSON.parse(localStorage.getItem('testHistory')) || [];
+let currentQuestions = [];
+let userAnswers = {};
+let currentPage = 0;
+const questionsPerPage = 5;
+let timer;
+let timeLeft = 0;
+let currentUser = null;
+
+// Questions – fixed syntax, commas added, duplicates removed, properly formatted
+const questions = [
+    // ── Integrated Science ───────────────────────────────────────────────
+    { subject: "science", text: "Best way to kill germs in drinking water in a Zambian village?", options: ["A. Adding sugar", "B. Boiling", "C. Adding salt", "D. Leaving in sun"], answer: "B", explanation: "Boiling kills most harmful germs by heating water to high temperatures." },
+    { subject: "science", text: "Which of these is a renewable source of energy commonly used in Zambia?", options: ["A. Coal", "B. Solar power", "C. Petrol", "D. Diesel"], answer: "B", explanation: "Solar power is renewable and widely available in Zambia." },
+    { subject: "science", text: "The main function of roots in a plant is to:", options: ["A. Make food", "B. Absorb water and minerals", "C. Produce flowers", "D. Release oxygen"], answer: "B", explanation: "Roots anchor the plant and absorb water and nutrients from the soil." },
+    { subject: "science", text: "Which blood vessel carries oxygenated blood away from the heart?", options: ["A. Vein", "B. Artery", "C. Capillary", "D. Pulmonary vein"], answer: "B", explanation: "Arteries carry oxygenated blood under high pressure away from the heart." },
+    { subject: "science", text: "What is the main cause of soil erosion in many Zambian farming areas?", options: ["A. Heavy rainfall and deforestation", "B. Excessive fertiliser use", "C. Over-irrigation", "D. Planting cover crops"], answer: "A", explanation: "Removal of vegetation and heavy rain lead to soil being washed away." },
+    { subject: "science", text: "Which instrument is used to measure atmospheric pressure?", options: ["A. Thermometer", "B. Barometer", "C. Anemometer", "D. Hygrometer"], answer: "B", explanation: "A barometer measures air pressure." },
+    { subject: "science", text: "The part of the seed that develops into the root is called the:", options: ["A. Cotyledon", "B. Radicle", "C. Plumule", "D. Testa"], answer: "B", explanation: "The radicle is the embryonic root." },
+    { subject: "science", text: "Which gas makes up the largest percentage of air?", options: ["A. Oxygen", "B. Carbon dioxide", "C. Nitrogen", "D. Argon"], answer: "C", explanation: "Nitrogen makes up about 78% of dry air." },
+    { subject: "science", text: "What type of energy is stored in a stretched rubber band?", options: ["A. Kinetic energy", "B. Potential energy", "C. Heat energy", "D. Chemical energy"], answer: "B", explanation: "Elastic potential energy is stored in stretched objects." },
+    { subject: "science", text: "Which vitamin helps prevent night blindness and is found in carrots?", options: ["A. Vitamin C", "B. Vitamin A", "C. Vitamin D", "D. Vitamin B"], answer: "B", explanation: "Vitamin A is essential for good vision, especially in low light." },
+    { subject: "science", text: "The process of changing from liquid to gas is called:", options: ["A. Condensation", "B. Evaporation", "C. Freezing", "D. Melting"], answer: "B", explanation: "Evaporation occurs when liquid turns into vapour." },
+    { subject: "science", text: "Which animal is a mammal that lays eggs?", options: ["A. Crocodile", "B. Platypus", "C. Python", "D. Eagle"], answer: "B", explanation: "The platypus is one of the few egg-laying mammals." },
+    { subject: "science", text: "What is the main function of white blood cells?", options: ["A. Carry oxygen", "B. Fight infection", "C. Clot blood", "D. Transport nutrients"], answer: "B", explanation: "White blood cells help defend the body against pathogens." },
+    { subject: "science", text: "Which layer of the atmosphere contains the ozone layer?", options: ["A. Troposphere", "B. Stratosphere", "C. Mesosphere", "D. Thermosphere"], answer: "B", explanation: "The ozone layer is in the stratosphere and protects us from UV rays." },
+    { subject: "science", text: "The main source of food for animals in a food chain is:", options: ["A. Carnivores", "B. Producers", "C. Decomposers", "D. Herbivores"], answer: "B", explanation: "Plants (producers) make food through photosynthesis." },
+    { subject: "science", text: "Which metal is a good conductor of electricity and commonly used in wires?", options: ["A. Iron", "B. Copper", "C. Aluminium", "D. Lead"], answer: "B", explanation: "Copper is an excellent conductor and is widely used." },
+    { subject: "science", text: "What causes a rainbow to form?", options: ["A. Reflection of light only", "B. Refraction and dispersion of light in water droplets", "C. Absorption of light", "D. Scattering of sound waves"], answer: "B", explanation: "Rainbows form when sunlight is refracted, reflected, and dispersed in raindrops." },
+    { subject: "science", text: "Which part of a flower becomes the fruit after fertilisation?", options: ["A. Stigma", "B. Ovary", "C. Anther", "D. Petal"], answer: "B", explanation: "The ovary develops into the fruit containing seeds." },
+    { subject: "science", text: "The SI unit of force is the:", options: ["A. Joule", "B. Newton", "C. Watt", "D. Pascal"], answer: "B", explanation: "Force is measured in newtons (N)." },
+    { subject: "science", text: "Which disease is caused by lack of iodine in the diet?", options: ["A. Rickets", "B. Goitre", "C. Scurvy", "D. Beriberi"], answer: "B", explanation: "Iodine deficiency leads to goitre (enlarged thyroid)." },
+    { subject: "science", text: "What type of mirror is used in car side mirrors to give a wider view?", options: ["A. Plane mirror", "B. Concave mirror", "C. Convex mirror", "D. Parabolic mirror"], answer: "C", explanation: "Convex mirrors provide a wider field of view." },
+    { subject: "science", text: "Main function of the heart in the human body?", options: ["A. Digesting food", "B. Pumping blood", "C. Breathing air", "D. Storing urine"], answer: "B", explanation: "The heart pumps oxygenated blood to the body and deoxygenated blood to the lungs." },
+    { subject: "science", text: "Which gas do plants take in during photosynthesis?", options: ["A. Oxygen", "B. Carbon dioxide", "C. Nitrogen", "D. Hydrogen"], answer: "B", explanation: "Plants use carbon dioxide and sunlight to produce food and release oxygen." },
+    { subject: "science", text: "The process by which plants lose water through leaves is called:", options: ["A. Transpiration", "B. Photosynthesis", "C. Respiration", "D. Germination"], answer: "A", explanation: "Transpiration helps plants move water and nutrients from roots to leaves." },
+    { subject: "science", text: "Which part of the eye controls the amount of light entering?", options: ["A. Retina", "B. Iris", "C. Cornea", "D. Lens"], answer: "B", explanation: "The iris adjusts the pupil size to control light entry." },
+    { subject: "science", text: "What is the main source of energy for Earth's climate system?", options: ["A. Moon", "B. Sun", "C. Wind", "D. Oceans"], answer: "B", explanation: "The Sun provides the primary energy through radiation." },
+    { subject: "science", text: "Which simple machine is used to lift heavy loads with less effort?", options: ["A. Wheel and axle", "B. Pulley", "C. Inclined plane", "D. Lever"], answer: "B", explanation: "A pulley changes the direction of force and can reduce effort." },
+    { subject: "science", text: "The breaking down of food in the body to release energy is called:", options: ["A. Digestion", "B. Respiration", "C. Egestion", "D. Assimilation"], answer: "B", explanation: "Cellular respiration releases energy from food." },
+    { subject: "science", text: "Which soil type holds the most water but drains poorly?", options: ["A. Sandy", "B. Clay", "C. Loamy", "D. Silt"], answer: "B", explanation: "Clay soil has small particles that retain water." },
+    { subject: "science", text: "What causes day and night on Earth?", options: ["A. Earth's rotation", "B. Earth's revolution", "C. Moon's orbit", "D. Tilt of Earth's axis"], answer: "A", explanation: "Earth's rotation on its axis causes day and night." },
+    { subject: "science", text: "Which disease is spread by mosquitoes in Zambia?", options: ["A. Tuberculosis", "B. Malaria", "C. Cholera", "D. Measles"], answer: "B", explanation: "Malaria is transmitted by female Anopheles mosquitoes." },
+    { subject: "science", text: "The unit used to measure electric current is:", options: ["A. Volt", "B. Ampere", "C. Watt", "D. Ohm"], answer: "B", explanation: "Ampere measures the flow of electric charge." },
+    { subject: "science", text: "Which organ in the digestive system absorbs most nutrients?", options: ["A. Stomach", "B. Small intestine", "C. Large intestine", "D. Liver"], answer: "B", explanation: "The small intestine has villi for nutrient absorption." },
+
+    // ── Mathematics ───────────────────────────────────────────────────────
+    { subject: "mathematics", text: "What is 25% of 200?", options: ["A. 25", "B. 50", "C. 75", "D. 100"], answer: "B", explanation: "25% = 0.25; 0.25 × 200 = 50." },
+    { subject: "mathematics", text: "What is 15% of 400?", options: ["A. 40", "B. 50", "C. 60", "D. 80"], answer: "C", explanation: "15% = 0.15; 0.15 × 400 = 60." },
+    { subject: "mathematics", text: "Simplify 2/5 + 3/10", options: ["A. 5/10", "B. 7/10", "C. 1/2", "D. 5/15"], answer: "B", explanation: "2/5 = 4/10; 4/10 + 3/10 = 7/10." },
+    { subject: "mathematics", text: "A bicycle costs K1,200. It is sold at a 25% loss. Selling price?", options: ["A. K900", "B. K1,500", "C. K960", "D. K800"], answer: "A", explanation: "Loss = 25% of 1200 = 300; 1200 – 300 = K900." },
+    { subject: "mathematics", text: "What is the volume of a cube with side length 4 cm?", options: ["A. 16 cm³", "B. 64 cm³", "C. 48 cm³", "D. 32 cm³"], answer: "B", explanation: "Volume = side³ = 4 × 4 × 4 = 64 cm³." },
+    { subject: "mathematics", text: "Solve: 5x – 12 = 23", options: ["A. x = 7", "B. x = 5", "C. x = 35", "D. x = 11"], answer: "A", explanation: "5x = 23 + 12 = 35; x = 35 ÷ 5 = 7." },
+    { subject: "mathematics", text: "The HCF of 18 and 24 is:", options: ["A. 6", "B. 12", "C. 3", "D. 9"], answer: "A", explanation: "Highest Common Factor of 18 and 24 is 6." },
+    { subject: "mathematics", text: "Convert 3.25 to a fraction in its simplest form.", options: ["A. 13/4", "B. 65/20", "C. 325/100", "D. 13/5"], answer: "A", explanation: "3.25 = 325/100 = 13/4." },
+    { subject: "mathematics", text: "A rectangle has length 12 cm and width 5 cm. What is its area?", options: ["A. 60 cm²", "B. 34 cm²", "C. 17 cm²", "D. 120 cm²"], answer: "A", explanation: "Area = length × width = 12 × 5 = 60 cm²." },
+    { subject: "mathematics", text: "What is the median of: 4, 7, 2, 9, 5?", options: ["A. 5", "B. 7", "C. 4", "D. 6"], answer: "A", explanation: "Ordered: 2, 4, 5, 7, 9 → middle number is 5." },
+    { subject: "mathematics", text: "If 4 workers build a wall in 6 days, how many days will 8 workers take?", options: ["A. 12 days", "B. 3 days", "C. 4 days", "D. 8 days"], answer: "B", explanation: "More workers → less time: (4 × 6) / 8 = 3 days." },
+    { subject: "mathematics", text: "What is 0.08 as a percentage?", options: ["A. 8%", "B. 0.8%", "C. 80%", "D. 0.08%"], answer: "A", explanation: "0.08 × 100 = 8%." },
+    { subject: "mathematics", text: "The next number in the pattern 3, 7, 12, 18, … is:", options: ["A. 22", "B. 25", "C. 24", "D. 28"], answer: "B", explanation: "Differences increase by 1 each time: +4, +5, +6 → next +7 = 25." },
+    { subject: "mathematics", text: "How many sides does a hexagon have?", options: ["A. 5", "B. 6", "C. 7", "D. 8"], answer: "B", explanation: "Hexagon has six sides." },
+    { subject: "mathematics", text: "What is 450 ÷ 15?", options: ["A. 25", "B. 30", "C. 35", "D. 20"], answer: "B", explanation: "15 × 30 = 450." },
+    { subject: "mathematics", text: "A bag contains 5 red, 3 blue and 2 green marbles. Probability of picking a red marble?", options: ["A. 1/2", "B. 1/3", "C. 5/10", "D. 3/10"], answer: "A", explanation: "5 red out of 10 total = 5/10 = 1/2." },
+    { subject: "mathematics", text: "What is the value of 9² – 5²?", options: ["A. 56", "B. 81", "C. 64", "D. 41"], answer: "A", explanation: "81 – 25 = 56 (difference of squares: (9-5)(9+5) = 4×14 = 56)." },
+    { subject: "mathematics", text: "Convert 2 hours 45 minutes to minutes.", options: ["A. 165 minutes", "B. 135 minutes", "C. 180 minutes", "D. 150 minutes"], answer: "A", explanation: "2 × 60 = 120; 120 + 45 = 165 minutes." },
+    { subject: "mathematics", text: "The perimeter of a square is 48 cm. What is the length of one side?", options: ["A. 8 cm", "B. 12 cm", "C. 16 cm", "D. 24 cm"], answer: "B", explanation: "Perimeter = 4 × side → side = 48 ÷ 4 = 12 cm." },
+    { subject: "mathematics", text: "What is the place value of 7 in 4.073?", options: ["A. Tenths", "B. Hundredths", "C. Thousandths", "D. Units"], answer: "C", explanation: "7 is in the thousandths place (0.001)." },
+    { subject: "mathematics", text: "If a = 4 and b = 7, what is 3a + 2b?", options: ["A. 26", "B. 22", "C. 19", "D. 28"], answer: "A", explanation: "3×4 + 2×7 = 12 + 14 = 26." },
+    { subject: "mathematics", text: "Simplify: 3/4 + 1/2", options: ["A. 5/4", "B. 1 1/4", "C. 1/2", "D. 4/6"], answer: "B", explanation: "3/4 + 2/4 = 5/4 = 1 1/4." },
+    { subject: "mathematics", text: "A farmer has 120 chickens. He sells 45. What percentage remains?", options: ["A. 37.5%", "B. 62.5%", "C. 45%", "D. 55%"], answer: "B", explanation: "75 remain; (75/120) × 100 = 62.5%." },
+    { subject: "mathematics", text: "Perimeter of a rectangle 8 cm long and 5 cm wide?", options: ["A. 13 cm", "B. 26 cm", "C. 40 cm", "D. 18 cm"], answer: "B", explanation: "Perimeter = 2(length + width) = 2(8 + 5) = 26 cm." },
+    { subject: "mathematics", text: "What is the value of 8 × (3 + 5) – 12?", options: ["A. 40", "B. 64", "C. 28", "D. 52"], answer: "D", explanation: "First: 3 + 5 = 8; then 8 × 8 = 64; finally 64 – 12 = 52." },
+    { subject: "mathematics", text: "Convert 3/5 to a decimal.", options: ["A. 0.6", "B. 0.5", "C. 0.35", "D. 0.65"], answer: "A", explanation: "3 ÷ 5 = 0.6." },
+    { subject: "mathematics", text: "If x + 15 = 42, what is x?", options: ["A. 27", "B. 57", "C. 18", "D. 33"], answer: "A", explanation: "x = 42 – 15 = 27." },
+    { subject: "mathematics", text: "The area of a square with side 6 cm is:", options: ["A. 12 cm²", "B. 24 cm²", "C. 36 cm²", "D. 18 cm²"], answer: "C", explanation: "Area = side × side = 6 × 6 = 36 cm²." },
+
+    // ── English Language ─────────────────────────────────────────────────
+    { subject: "english", text: "Choose the correct adjective: The _______ elephant walked slowly.", options: ["A. big", "B. bigger", "C. biggest", "D. bigly"], answer: "A", explanation: "Big is the positive form needed here." },
+    { subject: "english", text: "Choose the correct form: They _____ football every Saturday.", options: ["A. plays", "B. play", "C. playing", "D. played"], answer: "B", explanation: "Plural subject 'they' takes base form 'play'." },
+    { subject: "english", text: "What is the comparative form of 'good'?", options: ["A. gooder", "B. better", "C. best", "D. more good"], answer: "B", explanation: "Irregular comparative: good → better." },
+    { subject: "english", text: "The boy _____ the ball into the goal.", options: ["A. kick", "B. kicks", "C. kicked", "D. kicking"], answer: "C", explanation: "Past tense of 'kick' is 'kicked'." },
+    { subject: "english", text: "Which word is correctly spelt?", options: ["A. Neccessary", "B. Necessary", "C. Necesary", "D. Neccesary"], answer: "B", explanation: "Necessary has one 'c' and two 's'." },
+    { subject: "english", text: "The opposite of 'ancient' is:", options: ["A. Old", "B. Modern", "C. Historic", "D. Traditional"], answer: "B", explanation: "Modern means new or recent." },
+    { subject: "english", text: "Choose the correct preposition: The cat jumped _____ the table.", options: ["A. on", "B. over", "C. under", "D. in"], answer: "B", explanation: "Jumped over means passing above." },
+    { subject: "english", text: "Which sentence is in the passive voice?", options: ["A. The teacher marked the books", "B. The books were marked by the teacher", "C. The teacher is marking the books", "D. The teacher marks the books"], answer: "B", explanation: "Passive: subject receives the action." },
+    { subject: "english", text: "The plural of 'mouse' is:", options: ["A. Mouses", "B. Mice", "C. Mousees", "D. Mousen"], answer: "B", explanation: "Irregular plural: mouse → mice." },
+    { subject: "english", text: "He is taller _____ his brother.", options: ["A. then", "B. than", "C. that", "D. as"], answer: "B", explanation: "Comparative form uses 'than'." },
+    { subject: "english", text: "Which is a collective noun?", options: ["A. Book", "B. Team", "C. Run", "D. Beautiful"], answer: "B", explanation: "Team is a group name." },
+    { subject: "english", text: "Fill in: I have been waiting _____ two hours.", options: ["A. since", "B. for", "C. at", "D. on"], answer: "B", explanation: "We use 'for' with a period of time." },
+    { subject: "english", text: "The superlative form of 'bad' is:", options: ["A. badder", "B. worse", "C. worst", "D. most bad"], answer: "C", explanation: "Irregular superlative: bad → worst." },
+    { subject: "english", text: "Which word is an interjection?", options: ["A. Wow!", "B. Quickly", "C. Table", "D. And"], answer: "A", explanation: "Wow expresses strong emotion." },
+    { subject: "english", text: "Choose the correct article: _____ sun rises in the east.", options: ["A. A", "B. An", "C. The", "D. No article"], answer: "C", explanation: "We use 'the' for unique things like the sun." },
+    { subject: "english", text: "The boy and his sister _____ going to school.", options: ["A. is", "B. are", "C. was", "D. has"], answer: "B", explanation: "Plural subject takes 'are'." },
+    { subject: "english", text: "What is the past participle of 'write'?", options: ["A. wrote", "B. written", "C. writing", "D. writes"], answer: "B", explanation: "Past participle: write → written." },
+    { subject: "english", text: "Which sentence is correct?", options: ["A. She don't like mangoes", "B. She doesn't like mangoes", "C. She not like mangoes", "D. She isn't like mangoes"], answer: "B", explanation: "Third person singular negative uses 'doesn't'." },
+    { subject: "english", text: "Synonym for 'brave':", options: ["A. Cowardly", "B. Courageous", "C. Weak", "D. Scared"], answer: "B", explanation: "Courageous means showing courage." },
+    { subject: "english", text: "The word 'beautifully' is a(n):", options: ["A. Adjective", "B. Adverb", "C. Noun", "D. Verb"], answer: "B", explanation: "Adverbs often end in -ly and modify verbs." },
+    { subject: "english", text: "Antonym for 'expand':", options: ["A. Grow", "B. Increase", "C. Contract", "D. Stretch"], answer: "C", explanation: "Contract means to become smaller." },
+    { subject: "english", text: "Past tense of 'go'?", options: ["A. Goes", "B. Went", "C. Gone", "D. Going"], answer: "B", explanation: "Went is the irregular past tense." },
+    { subject: "english", text: "She is the girl _______ won the prize.", options: ["A. who", "B. which", "C. whose", "D. whom"], answer: "A", explanation: "Who is the correct subject relative pronoun for people." },
+    { subject: "english", text: "Opposite of 'generous' is:", options: ["A. Kind", "B. Selfish", "C. Brave", "D. Happy"], answer: "B", explanation: "Selfish means unwilling to give or share." },
+    { subject: "english", text: "Choose the correct sentence:", options: ["A. He go to school everyday", "B. He goes to school everyday", "C. He going to school everyday", "D. He gone to school everyday"], answer: "B", explanation: "Third person singular present tense uses 'goes'." },
+    { subject: "english", text: "Synonym for 'happy' is:", options: ["A. Sad", "B. Joyful", "C. Angry", "D. Tired"], answer: "B", explanation: "Joyful means feeling or showing great pleasure." },
+    { subject: "english", text: "The plural of 'child' is:", options: ["A. Childs", "B. Childes", "C. Children", "D. Childrens"], answer: "C", explanation: "Irregular plural: child → children." },
+    { subject: "english", text: "Which word is a noun?", options: ["A. Run", "B. Beautiful", "C. Book", "D. Quickly"], answer: "C", explanation: "Book is a naming word (noun)." },
+    { subject: "english", text: "Fill in: She _____ to the market yesterday.", options: ["A. go", "B. goes", "C. went", "D. going"], answer: "C", explanation: "Past tense of 'go' is 'went'." },
+    { subject: "english", text: "The teacher asked the pupils to _____ quiet.", options: ["A. keep", "B. kept", "C. keeping", "D. keeps"], answer: "A", explanation: "Infinitive form after 'to' is 'keep'." },
+    { subject: "english", text: "Which is an adverb?", options: ["A. Fast", "B. Quickly", "C. Run", "D. Dog"], answer: "B", explanation: "Quickly modifies a verb (how the action is done)." },
+    { subject: "english", text: "Correct spelling:", options: ["A. Recieve", "B. Receive", "C. Recive", "D. Receve"], answer: "B", explanation: "i before e except after c: receive." },
+    { subject: "english", text: "The capital city of Zambia is:", options: ["A. Kitwe", "B. Ndola", "C. Lusaka", "D. Livingstone"], answer: "C", explanation: "Lusaka is the capital and largest city." }
+];
+
+        // ────────────────────────────────────────────────
+        // HELPERS & FUNCTIONS
+        // ────────────────────────────────────────────────
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').textContent = now.toLocaleString('en-ZM', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if (id === 'studentDashboard' && currentUser?.role === 'student') updateStudentDashboard();
+            if (id === 'teacherDashboard') populateTeacherDashboard();
+        }
+
+        function updateStudentDashboard() {
+            document.getElementById('studentName').textContent = currentUser.username;
+            const myTests = testHistory.filter(t => t.student === currentUser.username);
+            const totalTests = myTests.length;
+            const totalCorrect = myTests.reduce((sum, t) => sum + t.score, 0);
+            const totalQuestions = myTests.reduce((sum, t) => sum + t.total, 0);
+            const totalReward = myTests.reduce((sum, t) => sum + t.reward, 0);
+            const avgScore = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+            const lastTest = myTests.length > 0 ? myTests[myTests.length - 1].date : 'None';
+
+            document.getElementById('totalTests').textContent = totalTests;
+            document.getElementById('totalScore').textContent = totalCorrect;
+            document.getElementById('totalReward').textContent = `K${totalReward.toFixed(2)}`;
+            document.getElementById('avgScore').textContent = `${avgScore}%`;
+            document.getElementById('lastTestDate').textContent = lastTest;
+        }
+
+        function login() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            if (role === 'teacher' && user === 'admin' && pass === 'admin123') {
+                currentUser = { username: 'admin', role: 'teacher' };
+                showSection('teacherDashboard');
+                return;
+            }
+
+            const student = students.find(s => s.username === user && s.password === pass);
+            if (student && role === 'student') {
+                currentUser = { ...student, role: 'student' };
+                showSection('studentDashboard');
+            } else {
+                alert("Invalid credentials or wrong role.");
+            }
+        }
+
+        function startTest() {
+            const subject = document.getElementById('subject').value;
+            const count = parseInt(document.getElementById('questionsCount').value);
+
+            if (!subject || !count) return alert("Please select subject and number of questions.");
+
+            let pool = questions.filter(q => q.subject === subject);
+            if (pool.length < count) return alert(`Only ${pool.length} questions available for ${subject}.`);
+
+            pool = [...pool].sort(() => Math.random() - 0.5);
+            currentQuestions = pool.slice(0, count);
+            userAnswers = {};
+            currentPage = 0;
+            timeLeft = count === 20 ? 600 : count === 30 ? 1200 : 1800;
+
+            showSection('testPage');
+            startTimer();
+            displayPage();
+            updateProgressBar();
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            document.getElementById('timeLeft').textContent = `Time Left: ${formatTime(timeLeft)}`;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timeLeft').textContent = `Time Left: ${formatTime(timeLeft)}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    submitTest();
+                }
+            }, 1000);
+        }
+
+        function displayPage() {
+            const start = currentPage * questionsPerPage;
+            const end = Math.min(start + questionsPerPage, currentQuestions.length);
+            const pageQs = currentQuestions.slice(start, end);
+
+            let html = '';
+            pageQs.forEach((q, i) => {
+                const globalIdx = start + i;
+                const selected = userAnswers[globalIdx];
+                html += `
+                    <div class="question">
+                        <p><strong>${globalIdx + 1}. ${q.text}</strong></p>
+                        ${q.options.map((opt, j) => {
+                            const val = String.fromCharCode(65 + j);
+                            const checked = selected === val ? 'checked' : '';
+                            return `
+                                <label class="option-row">
+                                    <input type="radio" name="q${globalIdx}" value="${val}" ${checked}
+                                           onchange="saveAnswer(${globalIdx}, '${val}')" class="option-radio">
+                                    ${val}. ${opt}
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            });
+
+            document.getElementById('questionContainer').innerHTML = html;
+            document.getElementById('pageInfo').textContent = `Page ${currentPage + 1} of ${Math.ceil(currentQuestions.length / questionsPerPage)}`;
+
+            document.getElementById('prevBtn').classList.toggle('hidden', currentPage === 0);
+
+            const isLastPage = (currentPage + 1) * questionsPerPage >= currentQuestions.length;
+            document.getElementById('nextBtn').classList.toggle('hidden', isLastPage);
+            document.getElementById('finishBtn').classList.toggle('hidden', !isLastPage);
+        }
+
+        function saveAnswer(idx, val) {
+            userAnswers[idx] = val;
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            const total = currentQuestions.length;
+            const answered = Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width = total > 0 ? (answered / total * 100) + '%' : '0%';
+        }
+
+        function nextPage() {
+            if (currentPage < Math.ceil(currentQuestions.length / questionsPerPage) - 1) {
+                currentPage++;
+                displayPage();
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                displayPage();
+            }
+        }
+
+        function submitTest() {
+            if (timer) clearInterval(timer);
+
+            let score = 0;
+            currentQuestions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) score++;
+            });
+
+            const reward = score * 0.50;
+            const result = {
+                student: currentUser.username,
+                subject: currentQuestions[0]?.subject || 'unknown',
+                score,
+                total: currentQuestions.length,
+                reward,
+                date: new Date().toLocaleDateString('en-ZM')
+            };
+
+            testHistory.push(result);
+            localStorage.setItem('testHistory', JSON.stringify(testHistory));
+
+            showSection('resultsSection');
+
+            document.getElementById('resultsDisplay').innerHTML = `
+                <p style="font-size:1.4rem; margin-bottom:15px;">
+                    Score: <strong>${score} / ${currentQuestions.length}</strong>
+                </p>
+                <p style="color:#27ae60; font-weight:bold; font-size:1.3rem;">
+                    Reward Earned: K${reward.toFixed(2)}
+                </p>
+            `;
+
+            let fb = '<h3 style="margin:20px 0 10px;">Feedback</h3>';
+            currentQuestions.forEach((q, i) => {
+                const ans = userAnswers[i];
+                let status = '';
+                if (ans === undefined) {
+                    status = '<span style="color:#7f8c8d">Not answered</span>';
+                } else if (ans === q.answer) {
+                    status = '<span style="color:#27ae60">Correct</span>';
+                } else {
+                    status = `<span style="color:#e74c3c">Wrong</span> (Correct: ${q.answer})`;
+                }
+                fb += `<p>Q${i+1}: ${status}<br><small>${q.explanation}</small></p>`;
+            });
+            document.getElementById('feedbackContainer').innerHTML = fb;
+        }
+
+        function populateTeacherDashboard() {
+            const tbody = document.getElementById('teacherTableBody');
+            tbody.innerHTML = testHistory.map(r => {
+                const student = students.find(s => s.username === r.student);
+                const masked = student ? '•'.repeat(student.password.length) : '—';
+                return `
+                    <tr>
+                        <td>${r.student}</td>
+                        <td>${masked}</td>
+                        <td>${r.subject}</td>
+                        <td>${r.score}/${r.total}</td>
+                        <td>K${r.reward.toFixed(2)}</td>
+                        <td>${r.date}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function addStudent() {
+            const u = document.getElementById('newStudentUsername').value.trim();
+            const p = document.getElementById('newStudentPassword').value;
+            if (!u || !p) return alert("Username and password required.");
+            if (students.some(s => s.username === u)) return alert("Username already taken.");
+            students.push({ username: u, password: p, role: 'student' });
+            localStorage.setItem('students', JSON.stringify(students));
+            alert(`Student "${u}" created.`);
+            document.getElementById('newStudentUsername').value = '';
+            document.getElementById('newStudentPassword').value = '';
+        }
+
+        function logout() {
+            currentUser = null;
+            location.reload();
+        }
+    </script>
+</body>
+</html>
